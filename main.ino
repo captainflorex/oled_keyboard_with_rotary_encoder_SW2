@@ -17,6 +17,7 @@ int indexCaractereSelectionne = 1;
 unsigned long dernierAppuiBouton = 0;
 int dernierEtatClk;
 int lireRotationEncodeur();
+void afficherEcritureMessage();
 
 int lireRotationEncodeur() {
   int etatClkActuel = digitalRead(PIN_ENCODEUR_CLK);
@@ -41,4 +42,27 @@ void afficherEcritureMessage() {
   if (listeCaracteres[indexCaractereSelectionne] == '<') { display.setCursor(45, 53); display.print(F("EFFACER")); } 
   else { display.setCursor(60, 53); display.print(listeCaracteres[indexCaractereSelectionne]); }
   display.display();
+}
+
+void setup() {
+  pinMode(PIN_ENCODEUR_CLK, INPUT_PULLUP);
+  pinMode(PIN_ENCODEUR_DT, INPUT_PULLUP); // IF LAKING EXTERN RES
+  pinMode(PIN_ENCODEUR_SW, INPUT_PULLUP); //SI ABSENCE DE RESISTANCES EXTERNES
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
+   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)) {
+   }
+  }
+  display.display(); delay(500); display.clearDisplay();
+  dernierEtatClk = digitalRead(PIN_ENCODEUR_CLK);
+switch(etatActuel) {
+    /*case ETAT_MENU: afficherMenu(); break;
+    case ETAT_MENU_REGLAGES: afficherMenuReglages(); break;*/
+    case ETAT_ECRITURE: afficherEcritureMessage(); break;
+    /*case ETAT_PRIORITE: afficherChoixPriorite(); break;
+    case ETAT_EDIT_PSEUDO: afficherEcriturePseudo(); break;
+    case ETAT_CONFIG_CANAL: afficherConfigCanal(); break;
+    case ETAT_CONFIG_SON: afficherConfigSon(); break;
+    case ETAT_LECTURE: afficherMessageRecu(); break;*/
+    default: etatActuel = ETAT_ECRITURE; afficherEcritureMessage(); break;
+  }
 }
