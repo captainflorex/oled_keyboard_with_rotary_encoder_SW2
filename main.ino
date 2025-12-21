@@ -18,6 +18,7 @@ unsigned long dernierAppuiBouton = 0;
 int dernierEtatClk;
 int lireRotationEncodeur();
 void afficherEcritureMessage();
+void biper();
 
 int lireRotationEncodeur() {
   int etatClkActuel = digitalRead(PIN_ENCODEUR_CLK);
@@ -44,6 +45,10 @@ void afficherEcritureMessage() {
   display.display();
 }
 
+void biper() {
+  tone(PIN_BUZZER, 2000, 50); 
+}
+
 void setup() {
   pinMode(PIN_ENCODEUR_CLK, INPUT_PULLUP);
   pinMode(PIN_ENCODEUR_DT, INPUT_PULLUP); // IF LAKING EXTERN RES
@@ -54,15 +59,45 @@ void setup() {
   }
   display.display(); delay(500); display.clearDisplay();
   dernierEtatClk = digitalRead(PIN_ENCODEUR_CLK);
-switch(etatActuel) {
-    /*case ETAT_MENU: afficherMenu(); break;
-    case ETAT_MENU_REGLAGES: afficherMenuReglages(); break;*/
-    case ETAT_ECRITURE: afficherEcritureMessage(); break;
-    /*case ETAT_PRIORITE: afficherChoixPriorite(); break;
-    case ETAT_EDIT_PSEUDO: afficherEcriturePseudo(); break;
-    case ETAT_CONFIG_CANAL: afficherConfigCanal(); break;
-    case ETAT_CONFIG_SON: afficherConfigSon(); break;
-    case ETAT_LECTURE: afficherMessageRecu(); break;*/
-    default: etatActuel = ETAT_ECRITURE; afficherEcritureMessage(); break;
+}
+
+void loop() {
+  int rotation = lireRotationEncodeur();
+  bool clicEncodeur = (digitalRead(PIN_ENCODEUR_SW) == LOW);
+  bool clicBoutonSW3 = (analogRead(PIN_BOUTON_SW3) < 100); 
+
+  if ((clicEncodeur || clicBoutonSW3) && (millis() - dernierAppuiBouton > 200)) {
+    dernierAppuiBouton = millis(); 
+    biper(); 
+  } else {
+    clicEncodeur = false;
+    clicBoutonSW3 = false;
   }
+if (rotation != 0) {
+        indexCaractereSelectionne += rotation;
+        if (indexCaractereSelectionne >= tailleListe) indexCaractereSelectionne = 0;
+        else if (indexCaractereSelectionne < 0) indexCaractereSelectionne = tailleListe - 1;
+        afficherEcritureMessage();
+      }
+      if (clicEncodeur) {
+        if (listeCaracteres[indexCaractereSelectionne] == '<') { 
+           etatActuel = ETAT_MENU; 
+           sauvegarderTout();
+           afficherMenu(); 
+        } 
+        else if (positionCurseur < MAX_LONGUEUR_MSG) {
+           message[positionCurseur] = listeCaracteres[indexCaractereSelectionne];
+           positionCurseur++;
+           message[positionCurseur] = '\0';
+           sauvegarderTout(); 
+           afficherEcritureMessage();
+        }
+      }
+      if (clicBoutonSW3) {
+        etatActuel = ETAT_PRIORITE;
+        prioriteMessage = 1; 
+        changerCouleurLed(0, 0, 255); 
+        sauvegarderTout();
+        afficherChoixPriorite();
+      }
 }
