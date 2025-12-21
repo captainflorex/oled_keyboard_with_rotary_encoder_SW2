@@ -28,3 +28,17 @@ int lireRotationEncodeur() {
   dernierEtatClk = etatClkActuel;
   return resultat;
 }
+
+void afficherEcritureMessage() {
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(0, 0); display.print(F("Message (")); display.print(positionCurseur); display.print(F(")"));
+  display.setCursor(0, 15); display.print(message);
+  display.fillRect(0, 50, 128, 14, SSD1306_WHITE);
+  display.setTextColor(SSD1306_BLACK);
+  
+  if (listeCaracteres[indexCaractereSelectionne] == '<') { display.setCursor(45, 53); display.print(F("EFFACER")); } 
+  else { display.setCursor(60, 53); display.print(listeCaracteres[indexCaractereSelectionne]); }
+  display.display();
+}
